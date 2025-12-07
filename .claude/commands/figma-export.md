@@ -1,20 +1,20 @@
 ---
 description: Export components and specs from Figma designs
-allowed-tools: Read, Write, WebFetch
+allowed-tools: Read, Write, WebFetch, Bash
 ---
 
-Extrae componentes y especificaciones de diseños de Figma.
+Extrae componentes y especificaciones de diseños de Figma usando la API directa.
 
 **Este comando requiere:**
-- MCP Figma integration configurada
-- Variable de entorno: FIGMA_TOKEN
-- Figma File ID o URL
+- Variable de entorno: FIGMA_TOKEN (en .env)
+- Figma File URL o File ID
 
 ## Proceso:
 
 1. **Obtener Figma File:**
-   - Pedir al usuario el Figma File ID o URL
-   - Usar MCP Figma para obtener el diseño
+   - Pedir al usuario el Figma File URL o ID
+   - Extraer File ID de la URL usando `src/lib/figma-api.ts`
+   - Hacer request a Figma API: `https://api.figma.com/v1/files/{fileId}`
 
 2. **Extraer Componentes:**
    - Identificar componentes en el diseño
