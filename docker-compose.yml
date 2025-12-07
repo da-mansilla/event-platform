@@ -1,0 +1,73 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: event-platform-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: eventdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - event-platform-network
+
+  # Next.js Application (Development)
+  nextjs:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.dev
+    container_name: event-platform-app
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://postgres:password@postgres:5432/eventdb?schema=public
+      - NEXTAUTH_URL=http://localhost:3000
+      - NEXTAUTH_SECRET=dev-secret-change-in-production
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.next
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - event-platform-network
+
+  # Prisma Studio (Database UI)
+  prisma-studio:
+    image: node:20-alpine
+    container_name: event-platform-studio
+    working_dir: /app
+    command: sh -c "npm install -g prisma && npx prisma studio --port 5555 --browser none"
+    ports:
+      - "5555:5555"
+    environment:
+      - DATABASE_URL=postgresql://postgres:password@postgres:5432/eventdb?schema=public
+    volumes:
+      - ./prisma:/app/prisma
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - event-platform-network
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  event-platform-network:
+    driver: bridge

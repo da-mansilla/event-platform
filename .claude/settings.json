@@ -1,0 +1,76 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm:*)",
+      "Bash(npx:*)",
+      "Bash(npm run:*)",
+      "Bash(npm install:*)",
+      "Bash(npm ci:*)",
+      "Bash(docker:*)",
+      "Bash(docker-compose:*)",
+      "Bash(git:*)",
+      "Bash(node:*)",
+      "Bash(ls:*)",
+      "Bash(pwd:*)",
+      "Bash(cat:*)",
+      "Bash(mkdir:*)",
+      "Bash(cd:*)",
+      "Bash(find:*)",
+      "Bash(grep:*)",
+      "Bash(echo:*)",
+      "Bash(which:*)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:npmjs.org)",
+      "WebFetch(domain:registry.npmjs.org)",
+      "WebFetch(domain:api.github.com)",
+      "WebFetch(domain:figma.com)",
+      "WebFetch(domain:api.figma.com)",
+      "Read(**)",
+      "Edit(**)",
+      "Write(**)",
+      "Glob(**)"
+    ],
+    "deny": [
+      "Read(.env)",
+      "Read(.env.local)",
+      "Read(.env.*)",
+      "Read(secrets/**)",
+      "Read(~/.ssh/**)",
+      "Read(~/.aws/**)",
+      "Bash(rm -rf /)",
+      "Bash(sudo:*)"
+    ],
+    "ask": [
+      "Bash(git push:*)"
+    ],
+    "defaultMode": "acceptEdits"
+  },
+  "model": "claude-sonnet-4-5-20250929",
+  "tools": {
+    "Bash": {
+      "enabled": true
+    },
+    "Read": {
+      "enabled": true
+    },
+    "Edit": {
+      "enabled": true
+    },
+    "Write": {
+      "enabled": true
+    }
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd /home/amansilla/www/claude/event-platform && npx prettier --write --ignore-unknown \"$FILE_PATH\" 2>/dev/null || true"
+          }
+        ]
+      }
+    ]
+  }
+}
